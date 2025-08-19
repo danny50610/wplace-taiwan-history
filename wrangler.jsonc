@@ -1,5 +1,6 @@
 {
     "name": "wplace-taiwan-history",
+    "compatibility_date": "2025-04-03",
     "assets": {
       "directory": "./dist"
     }
