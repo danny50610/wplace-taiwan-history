@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
             inViewNotFollowing: 'inView'
         },
         drawCircle: false,
+        initialZoomLevel: 11,
         onLocationError: function () {
             alert('無法定位，請確認有給予定位權限')
         },

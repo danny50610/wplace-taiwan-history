@@ -11,3 +11,13 @@ body {
 .wplace-tile {
     image-rendering: pixelated;
 }
+
+#ad {
+    position: absolute;
+    transform: translateX(-50%);
+    bottom: 20px;
+    left: 44%;
+    width: min(728px, 100vw - 50px);
+    height: 90px;
+    z-index: 1000;
+}
