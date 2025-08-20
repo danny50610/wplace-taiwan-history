@@ -1,4 +1,5 @@
 import './style.css'
+import { hasData, lastDateString, lastDate, getDateTimestamp } from './data.js';
 
 document.addEventListener("DOMContentLoaded", (event) => {
     function setUrl(lat, lng, zoom) {
@@ -81,13 +82,26 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }).addTo(map);
 
     const baseUrl = import.meta.env.VITE_WPLACE_TILE_URL;
-    L.tileLayer(baseUrl + '/1755619201/{x}/{y}.webp', {
-        minZoom: 11,
-        maxNativeZoom: 11,
-        keepBuffer: 1,
-        attribution: '<a href="https://wplace.live/">wplace</a>',
-        className: 'wplace-tile',
-    }).addTo(map);
+    let selectedDateString = lastDateString;
+    let selectedDate = lastDate;
+    L.TileLayer.Wplace = L.TileLayer.extend({
+        getTileUrl: function(coords) {
+            return baseUrl + '/' + selectedDate + `/${coords.x}/${coords.y}.webp`;
+        },
+    });
+    
+    L.tileLayer.wplace = function() {
+        return new L.TileLayer.Wplace('', {
+            minZoom: 11,
+            maxNativeZoom: 11,
+            keepBuffer: 1,
+            attribution: '<a href="https://wplace.live/">wplace</a>',
+            className: 'wplace-tile',
+        });
+    }
+    
+    let wplaceTileLayer = L.tileLayer.wplace();
+    wplaceTileLayer.addTo(map);
 
     map.on('click', function(e) {
         const lat = e.latlng.lat.toFixed(6);
@@ -120,4 +134,92 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }).addTo(map);
 
     registerSave(map);
+
+    function addDatePicker() {
+        const DatePickerControl = L.Control.extend({
+            onAdd: function(map) {
+                let div = L.DomUtil.create('div', "leaflet-bar leaflet-control");
+                let link = L.DomUtil.create('a', "leaflet-bar-part leaflet-bar-part-single", div);
+                link.id = "date-picker-button";
+                link.href = "#";
+                link.setAttribute("role", "button");
+                link.innerHTML = '<i class="fa-solid fa-calendar-days"></i>';
+
+                let isInit = false;
+                let isOpen = false;
+                L.DomEvent.on(link, "click", function (e) {
+                    L.DomEvent.stopPropagation(e);
+                    L.DomEvent.preventDefault(e);
+
+                    let $datePickerButton = $('#date-picker-button');
+                    if (!isInit) {
+                        $datePickerButton.daterangepicker({
+                            startDate: selectedDateString,
+                            singleDatePicker: true,
+                            opens: 'left',
+                            autoUpdateInput: false, // 不自動填值
+                            isInvalidDate: hasData,
+                            locale: {
+                                format: 'YYYY-MM-DD',
+                                applyLabel: '套用',
+                                cancelLabel: '取消',
+                                "daysOfWeek": [
+                                    "日",
+                                    "一",
+                                    "二",
+                                    "三",
+                                    "四",
+                                    "五",
+                                    "六",
+                                ],
+                                "monthNames": [
+                                    "1月",
+                                    "2月",
+                                    "3月",
+                                    "4月",
+                                    "5月",
+                                    "6月",
+                                    "7月",
+                                    "8月",
+                                    "9月",
+                                    "10月",
+                                    "11月",
+                                    "12月",
+                                ],
+                            }
+                        });
+
+                        $datePickerButton.on('apply.daterangepicker', function(ev, picker) {
+                            selectedDateString = picker.startDate.format('YYYY-MM-DD');
+                            selectedDate = getDateTimestamp(picker.startDate);
+                            wplaceTileLayer.remove();
+                            wplaceTileLayer.addTo(map);
+                            isOpen = false;
+                        });
+
+                        $datePickerButton.on('cancel.daterangepicker', function(ev, picker) {
+                            isOpen = false;
+                        });
+                    }
+
+                    if (isOpen) {
+                        $datePickerButton.data('daterangepicker').hide();
+                        isOpen = false;
+                    } else {
+                        $datePickerButton.data('daterangepicker').show();
+                        isOpen = true;
+                    }
+                });
+
+                return div;
+            },
+
+            onRemove: function(map) {
+                // Nothing to do here
+            }
+        });
+        L.control.datePicker = function(opts) { return new DatePickerControl(opts);}
+        L.control.datePicker({ position: 'topright' }).addTo(map);
+    }
+    addDatePicker();
 });
