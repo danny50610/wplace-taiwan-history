@@ -1,12 +1,79 @@
 import './style.css'
 
 document.addEventListener("DOMContentLoaded", (event) => {
-    const container = document.getElementById('app');
+    function setUrl(lat, lng, zoom) {
+        const url = new URL(window.location);
+        url.searchParams.set('lat', lat);
+        url.searchParams.set('lng', lng);
+        url.searchParams.set('z', zoom);
+        window.history.replaceState({}, '', url);
+    }
 
-    const map = L.map(container, {
-        center: L.latLng(25.038227, 121.532079),
-        zoom: 11,
-    });
+    function registerSave(map) {
+        map.on('moveend', function(e) {
+            const lat = e.target.getCenter().lat;
+            const lng = e.target.getCenter().lng;
+            const zoom = e.target.getZoom();
+
+            localStorage.setItem('last-viewer-lat', lat);
+            localStorage.setItem('last-viewer-lng', lng);
+
+            setUrl(lat, lng, zoom);
+        });
+
+        map.on('zoomend', function(e){
+            const lat = e.target.getCenter().lat;
+            const lng = e.target.getCenter().lng;
+            const zoom = e.target.getZoom();
+
+            localStorage.setItem('last-viewer-zoom', zoom);
+
+            setUrl(lat, lng, zoom);
+        });
+    }
+
+    let lastLat = null;
+    let lastLng = null;
+    let lastZoom = null;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('lat') && params.has('lng')) {
+        const lat = parseFloat(params.get('lat'));
+        const lng = parseFloat(params.get('lng'));
+        if (!isNaN(lat) && !isNaN(lng) && -90 <= lat && lat <= 90 && -180 <= lng && lng <= 180) {
+            lastLat = lat;
+            lastLng = lng;
+        }
+
+        const zoom = parseInt(params.get('z'));
+        if (!isNaN(zoom) && 0 <= zoom && zoom <= 18) {
+            lastZoom = zoom;
+        }
+    }
+
+    if (lastLat == null) {
+        lastLat = localStorage.getItem('last-viewer-lat');
+        if (lastLat == null) {
+            lastLat = 25.038227;
+        }
+    }
+
+    if (lastLng == null) {
+        lastLng = localStorage.getItem('last-viewer-lng');
+        if (lastLng == null) {
+            lastLng = 121.532079;
+        }
+    }
+
+    if (lastZoom == null) {
+        lastZoom = localStorage.getItem('last-viewer-zoom');
+        if (lastZoom == null) {
+            lastZoom = 11;
+        }
+    }
+
+    setUrl(lastLat, lastLng, lastZoom);
+
+    const map = L.map('app').setView([lastLat, lastLng], lastZoom);
 
     L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/EPSG:3857/{z}/{y}/{x}', {
         maxZoom: 18,
@@ -23,11 +90,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }).addTo(map);
 
     // https://github.com/domoritz/leaflet-locatecontrol
-    var lc = L.control.locate({
+    let lc = L.control.locate({
         position: 'bottomright',
         showPopup: false,
         clickBehavior: {
-            inView: 'setView',
+            inView: 'stop',
             outOfView: 'setView',
             inViewNotFollowing: 'inView'
         },
@@ -40,9 +107,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
             title: '',
         }
     }).addTo(map);
-    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-        if (result.state === 'granted') {
-            lc.start();
-        }
-    });
+
+    registerSave(map);
 });
