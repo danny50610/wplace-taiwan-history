@@ -1,11 +1,11 @@
 html,
 body {
-  margin: 0;
+    margin: 0;
 }
 
 #app {
-  width: 100vw;
-  height: 100dvh;
+    width: 100vw;
+    height: 100dvh;
 }
 
 .wplace-tile {
@@ -20,4 +20,5 @@ body {
     width: min(728px, 100vw - 50px);
     height: 90px;
     z-index: 1000;
+    background-color: lightblue;
 }
