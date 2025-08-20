@@ -89,6 +89,17 @@ document.addEventListener("DOMContentLoaded", (event) => {
         className: 'wplace-tile',
     }).addTo(map);
 
+    map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        const zoom = map.getZoom();
+        const url = `https://wplace.live/?lat=${lat}&lng=${lng}&zoom=${zoom}`;
+        L.popup()
+            .setLatLng(e.latlng)
+            .setContent(`<a href="${url}" target="_blank">Go to wplace</a>`)
+            .openOn(map);
+    });
+
     // https://github.com/domoritz/leaflet-locatecontrol
     let lc = L.control.locate({
         position: 'bottomright',
