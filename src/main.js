@@ -13,6 +13,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
         attribution: 'TGOS © <a href="https://www.tgos.tw/">內政部</a>'
     }).addTo(map);
 
+    const baseUrl = import.meta.env.VITE_WPLACE_TILE_URL;
+    L.tileLayer(baseUrl + '/1755532802/{x}/{y}.webp', {
+        minZoom: 11,
+        maxNativeZoom: 11,
+        keepBuffer: 1,
+        attribution: '<a href="https://wplace.live/">wplace</a>©',
+        className: 'wplace-tile',
+    }).addTo(map);
+
     // https://github.com/domoritz/leaflet-locatecontrol
     var lc = L.control.locate({
         position: 'bottomright',
