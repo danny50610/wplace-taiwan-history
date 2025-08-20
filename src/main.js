@@ -14,11 +14,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }).addTo(map);
 
     const baseUrl = import.meta.env.VITE_WPLACE_TILE_URL;
-    L.tileLayer(baseUrl + '/1755532802/{x}/{y}.webp', {
+    L.tileLayer(baseUrl + '/1755619201/{x}/{y}.webp', {
         minZoom: 11,
         maxNativeZoom: 11,
         keepBuffer: 1,
-        attribution: '<a href="https://wplace.live/">wplace</a>©',
+        attribution: '<a href="https://wplace.live/">wplace</a>',
         className: 'wplace-tile',
     }).addTo(map);
 
@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
             outOfView: 'setView',
             inViewNotFollowing: 'inView'
         },
+        drawCircle: false,
         onLocationError: function () {
             alert('無法定位，請確認有給予定位權限')
         },
