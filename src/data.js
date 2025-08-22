@@ -8,10 +8,12 @@ const dataAt = {
 export const lastDateString = '2025-08-22';
 export const lastDate = dataAt[lastDateString];
 
-export function hasData(date) {
-    return !dataAt.hasOwnProperty(date.format('YYYY-MM-DD'));
+export function isInvalidDate(date) {
+    const dateString = typeof date === 'string' ? date : date.format('YYYY-MM-DD');
+    return !dataAt.hasOwnProperty(dateString);
 }
 
 export function getDateTimestamp(date) {
-    return dataAt[date.format('YYYY-MM-DD')];
+    const dateString = typeof date === 'string' ? date : date.format('YYYY-MM-DD');
+    return dataAt[dateString];
 }

@@ -1,5 +1,5 @@
 import './style.css'
-import { hasData, lastDateString, lastDate, getDateTimestamp } from './data.js';
+import { isInvalidDate, lastDateString, lastDate, getDateTimestamp } from './data.js';
 
 document.addEventListener("DOMContentLoaded", (event) => {
     function setUrl(lat, lng, zoom) {
@@ -36,6 +36,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
     let lastLat = null;
     let lastLng = null;
     let lastZoom = null;
+    let selectedDateString = lastDateString;
+    let selectedDate = lastDate;
     const params = new URLSearchParams(window.location.search);
     if (params.has('lat') && params.has('lng')) {
         const lat = parseFloat(params.get('lat'));
@@ -48,6 +50,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
         const zoom = parseInt(params.get('z'));
         if (!isNaN(zoom) && 0 <= zoom && zoom <= 18) {
             lastZoom = zoom;
+        }
+    }
+
+    if (params.has('date')) {
+        const dateParam = params.get('date');
+        if (!isInvalidDate(dateParam)) {
+            selectedDateString = dateParam;
+            selectedDate = getDateTimestamp(dateParam);
         }
     }
 
@@ -82,8 +92,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }).addTo(map);
 
     const baseUrl = import.meta.env.VITE_WPLACE_TILE_URL;
-    let selectedDateString = lastDateString;
-    let selectedDate = lastDate;
     L.TileLayer.Wplace = L.TileLayer.extend({
         getTileUrl: function(coords) {
             return baseUrl + '/' + selectedDate + `/${coords.x}/${coords.y}.webp`;
@@ -158,7 +166,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
                             singleDatePicker: true,
                             opens: 'left',
                             autoUpdateInput: false, // 不自動填值
-                            isInvalidDate: hasData,
+                            isInvalidDate: isInvalidDate,
                             locale: {
                                 format: 'YYYY-MM-DD',
                                 applyLabel: '套用',
