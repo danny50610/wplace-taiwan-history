@@ -1,7 +1,12 @@
 import './style.css'
-import { isInvalidDate, lastDateString, lastDate, getDateTimestamp } from './data.js';
+import { initializeData, isInvalidDate, getDateTimestamp } from './data.js';
 
-document.addEventListener("DOMContentLoaded", (event) => {
+document.addEventListener("DOMContentLoaded", async (event) => {
+    let baseUrl = import.meta.env.VITE_WPLACE_TILE_URL;
+    const result =  await initializeData(baseUrl);
+    let selectedDateString = result.lastDateString;
+    let selectedDate = result.lastDate;
+
     function setUrl(lat, lng, zoom) {
         const url = new URL(window.location);
         url.searchParams.set('lat', lat);
@@ -36,8 +41,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     let lastLat = null;
     let lastLng = null;
     let lastZoom = null;
-    let selectedDateString = lastDateString;
-    let selectedDate = lastDate;
     const params = new URLSearchParams(window.location.search);
     if (params.has('lat') && params.has('lng')) {
         const lat = parseFloat(params.get('lat'));
@@ -91,7 +94,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
         attribution: 'TGOS © <a href="https://www.tgos.tw/">內政部</a>'
     }).addTo(map);
 
-    const baseUrl = import.meta.env.VITE_WPLACE_TILE_URL;
     L.TileLayer.Wplace = L.TileLayer.extend({
         getTileUrl: function(coords) {
             return baseUrl + '/' + selectedDate + `/${coords.x}/${coords.y}.webp`;

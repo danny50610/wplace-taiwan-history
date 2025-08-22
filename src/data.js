@@ -1,12 +1,17 @@
-const dataAt = {
-    '2025-08-19': '1755532802',
-    '2025-08-20': '1755619201',
-    '2025-08-21': '1755705601',
-    '2025-08-22': '1755792001',
-};
+let dataAt = {};
 
-export const lastDateString = '2025-08-22';
-export const lastDate = dataAt[lastDateString];
+export async function initializeData(baseUrl) {
+    const response = await fetch(`${baseUrl}/data.json`);
+    const responseData = await response.json();
+    
+    dataAt = responseData.date;
+    
+    const lastDateString = responseData.lastDateString;
+    return {
+        lastDateString: lastDateString,
+        lastDate: dataAt[lastDateString]
+    };
+}
 
 export function isInvalidDate(date) {
     const dateString = typeof date === 'string' ? date : date.format('YYYY-MM-DD');
