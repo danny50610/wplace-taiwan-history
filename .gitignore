@@ -96,6 +96,7 @@ $RECYCLE.BIN/
 
 node_modules
 dist
+wplace_tile
 .wrangler
 .env
 .env.*
