@@ -99,3 +99,4 @@ dist
 .wrangler
 .env
 .env.*
+!.env.example
